@@ -97,13 +97,13 @@ public class ShopGrid {
 		 
 		GridBlock newBlock = Blocks[new_x][new_y];
 		
-		if (!newBlock.occupied())  {  //get successful because block not occupied
-			newBlock.get();
-			currentBlock.release(); //must release current block
-		}
-		else {
+		if (newBlock.occupied())  {
 			newBlock=currentBlock;
 			///Block occupied - giving up
+		}
+		else {
+			newBlock.get();
+			currentBlock.release(); //must release current block
 		}
 		return newBlock;
 	} 
