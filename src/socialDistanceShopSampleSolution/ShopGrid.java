@@ -4,8 +4,6 @@
  
 package socialDistanceShopSampleSolution;
 
-import java.util.concurrent.Semaphore;
-
 //class representing the shop.
 public class ShopGrid {
 	private GridBlock [][] Blocks;
@@ -14,8 +12,6 @@ public class ShopGrid {
 	public final int checkout_y;
 	private final static int minX =5;//minimum x dimension
 	private final static int minY =5;//minimum y dimension
-	private Semaphore enter;
-	
 	
 	ShopGrid() throws InterruptedException {
 		this.x=20;
@@ -34,7 +30,6 @@ public class ShopGrid {
 		this.checkout_y=y-3;
 		Blocks = new GridBlock[x][y];
 		this.initGrid(exitBlocks);
-		enter = new Semaphore(1);
 	}
 	
 	private  void initGrid(int [][] exitBlocks) throws InterruptedException {
@@ -76,7 +71,6 @@ public class ShopGrid {
 	
 	//called by customer when entering shop
 	public GridBlock enterShop() throws InterruptedException  {
-		enter.acquire();
 		GridBlock entrance = whereEntrance();
 		entrance.get();
 		return entrance;
@@ -96,7 +90,6 @@ public class ShopGrid {
 		if (!inGrid(new_x,new_y)) {
 			//Invalid move to outside shop - ignore
 			return currentBlock;
-			
 		}
 
 		if ((new_x==currentBlock.getX())&&(new_y==currentBlock.getY())) //not actually moving
@@ -107,8 +100,6 @@ public class ShopGrid {
 		if (!newBlock.occupied())  {  //get successful because block not occupied
 			newBlock.get();
 			currentBlock.release(); //must release current block
-			if (currentBlock == whereEntrance())
-				enter.release();
 		}
 		else {
 			newBlock=currentBlock;
