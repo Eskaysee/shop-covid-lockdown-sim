@@ -47,13 +47,13 @@ public class PeopleCounter {
 	}
 	
 	//update counters for a person entering the shop
-	public void personEntered() throws InterruptedException{
+	public void personEntered(){
 		peopleOutSide.decrementAndGet();
 		peopleInside.incrementAndGet();
 	}
 
 	//update counters for a person exiting the shop
-	public void personLeft() throws InterruptedException{
+	public void personLeft(){
 		peopleInside.decrementAndGet();
 		peopleLeft.incrementAndGet();
 	}
