@@ -4,7 +4,7 @@
  
 package socialDistanceShopSampleSolution;
 
-import java.util.concurrent.atomic.AtomicInteger;
+import java.util.concurrent.Semaphore;
 
 //class representing the shop.
 public class ShopGrid {
@@ -14,8 +14,7 @@ public class ShopGrid {
 	public final int checkout_y;
 	private final static int minX =5;//minimum x dimension
 	private final static int minY =5;//minimum y dimension
-	//private AtomicInteger occupancy;
-	//private final int max;
+	private Semaphore empty, full, mutex;
 
 	ShopGrid() throws InterruptedException {
 		this.x=20;
@@ -24,7 +23,6 @@ public class ShopGrid {
 		Blocks = new GridBlock[x][y];
 		int [] [] dfltExit= {{10,10}};
 		this.initGrid(dfltExit);
-		//max = x*y;
 	}
 	
 	ShopGrid(int x, int y, int [][] exitBlocks,int maxPeople) throws InterruptedException {
@@ -32,11 +30,12 @@ public class ShopGrid {
 		if (y<minY) y=minY; //minimum x
 		this.x=x;
 		this.y=y;
-		//max = maxPeople;
 		this.checkout_y=y-3;
 		Blocks = new GridBlock[x][y];
 		this.initGrid(exitBlocks);
-		//occupancy = new AtomicInteger(0);
+		empty = new Semaphore(maxPeople);
+		full = new Semaphore(0);
+		mutex = new Semaphore(1);
 	}
 	
 	private  void initGrid(int [][] exitBlocks) throws InterruptedException {
@@ -78,8 +77,12 @@ public class ShopGrid {
 	
 	//called by customer when entering shop
 	public GridBlock enterShop() throws InterruptedException  {
+		empty.acquire();
+		mutex.acquire();
 		GridBlock entrance = whereEntrance();
 		entrance.get();
+		mutex.release();
+		full.release();
 		return entrance;
 	}
 		
@@ -116,8 +119,12 @@ public class ShopGrid {
 	} 
 	
 	//called by customer to exit the shop
-	public void leaveShop(GridBlock currentBlock)   {
+	public void leaveShop(GridBlock currentBlock) throws InterruptedException{
+		full.acquire();
+		mutex.acquire();
 		currentBlock.release();
+		mutex.release();
+		empty.release();
 	}
 
 }

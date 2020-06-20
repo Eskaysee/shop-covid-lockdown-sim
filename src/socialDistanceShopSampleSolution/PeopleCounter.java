@@ -1,43 +1,39 @@
 package socialDistanceShopSampleSolution;
 
-import java.util.concurrent.Semaphore;
+import java.util.concurrent.atomic.AtomicInteger;
 
 //class to keep track of people inside and outside and left shop
 public class PeopleCounter {
-	private int peopleOutSide; //counter for people arrived but not yet in the building
-	private int peopleInside; //people inside the shop
-	private int peopleLeft; //people left the shop
-	private int maxPeople; //maximum for lockdown rules
-	private Semaphore empty, full, mutex;
-	
+	private AtomicInteger peopleOutSide; //counter for people arrived but not yet in the building
+	private AtomicInteger peopleInside; //people inside the shop
+	private AtomicInteger peopleLeft; //people left the shop
+	private final int maxPeople; //maximum for lockdown rules
+
 	PeopleCounter(int max) {
-		peopleOutSide = 0;
-		peopleInside = 0;
-		peopleLeft = 0;
-		empty = new Semaphore(max);
-		full = new Semaphore(0);
-		mutex = new Semaphore(1);
+		peopleOutSide = new AtomicInteger(0);
+		peopleInside = new AtomicInteger(0);
+		peopleLeft = new AtomicInteger(0);
 		maxPeople = max;
 	}
 		
 	//getter
 	public int getWaiting() {
-		return peopleOutSide;
+		return peopleOutSide.get();
 	}
 
 	//getter
 	public int getInside() {
-		return peopleInside;
+		return peopleInside.get();
 	}
 	
 	//getter
 	public int getTotal() {
-		return (peopleOutSide+peopleInside+peopleLeft);
+		return (getWaiting()+getInside()+getLeft());
 	}
 
 	//getter
 	public int getLeft() {
-		return peopleLeft;
+		return peopleLeft.get();
 	}
 	
 	//getter
@@ -47,33 +43,25 @@ public class PeopleCounter {
 	
 	//getter
 	public void personArrived() {
-		peopleOutSide++;
+		peopleOutSide.incrementAndGet();
 	}
 	
 	//update counters for a person entering the shop
 	public void personEntered() throws InterruptedException{
-		empty.acquire();
-		mutex.acquire();
-		peopleOutSide--;
-		peopleInside++;
-		mutex.release();
-		full.release();
+		peopleOutSide.decrementAndGet();
+		peopleInside.incrementAndGet();
 	}
 
 	//update counters for a person exiting the shop
 	public void personLeft() throws InterruptedException{
-		full.acquire();
-		mutex.acquire();
-		peopleInside--;
-		peopleLeft++;
-		mutex.release();
-		empty.release();
+		peopleInside.decrementAndGet();
+		peopleLeft.incrementAndGet();
 	}
 
 	//reset - not really used
 	synchronized public void resetScore() {
-		peopleInside = 0;
-		peopleOutSide = 0;
-		peopleLeft = 0;
+		peopleInside.getAndSet(0);
+		peopleOutSide.getAndSet(0);
+		peopleLeft.getAndSet(0);
 	}
 }
