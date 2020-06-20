@@ -4,6 +4,8 @@
  
 package socialDistanceShopSampleSolution;
 
+import java.util.concurrent.atomic.AtomicInteger;
+
 //class representing the shop.
 public class ShopGrid {
 	private GridBlock [][] Blocks;
@@ -12,7 +14,9 @@ public class ShopGrid {
 	public final int checkout_y;
 	private final static int minX =5;//minimum x dimension
 	private final static int minY =5;//minimum y dimension
-	
+	//private AtomicInteger occupancy;
+	//private final int max;
+
 	ShopGrid() throws InterruptedException {
 		this.x=20;
 		this.y=20;
@@ -20,6 +24,7 @@ public class ShopGrid {
 		Blocks = new GridBlock[x][y];
 		int [] [] dfltExit= {{10,10}};
 		this.initGrid(dfltExit);
+		//max = x*y;
 	}
 	
 	ShopGrid(int x, int y, int [][] exitBlocks,int maxPeople) throws InterruptedException {
@@ -27,9 +32,11 @@ public class ShopGrid {
 		if (y<minY) y=minY; //minimum x
 		this.x=x;
 		this.y=y;
+		//max = maxPeople;
 		this.checkout_y=y-3;
 		Blocks = new GridBlock[x][y];
 		this.initGrid(exitBlocks);
+		//occupancy = new AtomicInteger(0);
 	}
 	
 	private  void initGrid(int [][] exitBlocks) throws InterruptedException {
