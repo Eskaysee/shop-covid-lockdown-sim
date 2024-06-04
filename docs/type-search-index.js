@@ -1,0 +1,1 @@
+typeSearchIndex = [{"l":"All Classes","url":"allclasses-index.html"},{"p":"socialDistanceShopSampleSolution","l":"GridBlock"},{"p":"socialDistanceShopSampleSolution","l":"PeopleCounter"},{"p":"socialDistanceShopSampleSolution","l":"ShopGrid"}]

@@ -6,7 +6,12 @@ package socialDistanceShopSampleSolution;
 
 import java.util.concurrent.Semaphore;
 
-//class representing the shop.
+/**
+ *class representing the shop.
+ * @author Prof. M.Kuttel
+ * @author Sihle Calana
+ */
+
 public class ShopGrid {
 	private GridBlock [][] Blocks;
 	private final int x;
@@ -14,7 +19,7 @@ public class ShopGrid {
 	public final int checkout_y;
 	private final static int minX =5;//minimum x dimension
 	private final static int minY =5;//minimum y dimension
-	private Semaphore empty, full, mutex;
+	private Semaphore empty, full;
 
 	ShopGrid() throws InterruptedException {
 		this.x=20;
@@ -24,7 +29,16 @@ public class ShopGrid {
 		int [] [] dfltExit= {{10,10}};
 		this.initGrid(dfltExit);
 	}
-	
+
+	/**
+	 * Creates the Shop using the GridBlocks
+	 * @see GridBlock
+	 * @param x	dimension
+	 * @param y dimension
+	 * @param exitBlocks
+	 * @param maxPeople
+	 * @throws InterruptedException
+	 */
 	ShopGrid(int x, int y, int [][] exitBlocks,int maxPeople) throws InterruptedException {
 		if (x<minX) x=minX; //minimum x
 		if (y<minY) y=minY; //minimum x
@@ -35,7 +49,6 @@ public class ShopGrid {
 		this.initGrid(exitBlocks);
 		empty = new Semaphore(maxPeople);
 		full = new Semaphore(0);
-		mutex = new Semaphore(1);
 	}
 	
 	private  void initGrid(int [][] exitBlocks) throws InterruptedException {
@@ -74,19 +87,30 @@ public class ShopGrid {
 			return false;
 		return true;
 	}
-	
-	//called by customer when entering shop
+
+	/**
+	 * called by customer when entering shop
+	 * @return GridBlock
+	 * @see GridBlock
+	 * @throws InterruptedException
+	 */
 	public GridBlock enterShop() throws InterruptedException  {
 		empty.acquire();
-		mutex.acquire();
 		GridBlock entrance = whereEntrance();
 		entrance.get();
-		mutex.release();
 		full.release();
 		return entrance;
 	}
-		
-	//called when customer wants to move to a location in the shop
+
+	/**
+	 * called when customer wants to move to a location in the shop
+	 * @param currentBlock current location of the customer
+	 * @see CustomerLocation
+	 * @param step_x
+	 * @param step_y
+	 * @return GridBlock
+	 * @throws InterruptedException
+	 */
 	public GridBlock move(GridBlock currentBlock,int step_x, int step_y) throws InterruptedException {  
 		//try to move in 
 		
@@ -116,14 +140,16 @@ public class ShopGrid {
 			currentBlock.release(); //must release current block
 		}
 		return newBlock;
-	} 
-	
-	//called by customer to exit the shop
+	}
+
+	/**
+	 * called by customer to exit the shop
+	 * @param currentBlock
+	 * @throws InterruptedException
+	 */
 	public void leaveShop(GridBlock currentBlock) throws InterruptedException{
 		full.acquire();
-		mutex.acquire();
 		currentBlock.release();
-		mutex.release();
 		empty.release();
 	}
 
